@@ -103,7 +103,7 @@ Route::get('/users', [
 
 Você pode usar em qualquer lugar que o usuário esteja autenticado, usando o Auth.
 
-Exemplo:
+Exemplos:
 
 ```
 if (Auth::user()->hasPermission('user.create')) {
