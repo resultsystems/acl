@@ -93,10 +93,10 @@ Route::get('/users', [
     }]);
 
     //needsPermission=middleware
-    //permission.5=permissão 5
-    //permission.10=permissão 10
+    //user.read=permissão user.read
+    //user.create=permissão user.create
     //any=true Usuário pode ter qualquer das permissões informadas
-    //1=Filial/Empresa (opcional)
+    //5=Filial/Empresa (opcional)
 ```
 
 #Usar em qualquer lugar com o Auth
