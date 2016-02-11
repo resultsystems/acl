@@ -4,7 +4,7 @@ ACL é um package ACL para Laravel 5 que utiliza filial, grupos e permissões.
 Este projeto tem como objetivo prover o controle de acesso da sua aplicação.
 Foi desenvolvido pensando em multi-empresa/filiais.
 
-## Instação
+## Instalação
 
 ACL pode ser instalado através do composer. Para que o package seja adicionado automaticamente ao seu arquivo composer.json execute o seguinte comando:
 
@@ -52,7 +52,6 @@ Execute as migrations, para que sejam criadas as tabelas no banco de dados:
 
 php artisan migrate
 
-
 ## 5. Middleware do ACL
 
 Caso você tenha a necessidade de realizar o controle de acesso diretamente nas rotas, o ACL possui um middleware (nativos) que abordam os casos mais comuns. Para utilizá-los é necessário registrá-los no seu arquivo app/Http/Kernel.php.
@@ -67,7 +66,6 @@ protected $routeMiddleware = [
     'needsPermission' => \ResultSystems\Acl\AclServiceProvider::class,
 ];
 ```
-
 
 ## Usando o ACL
 
