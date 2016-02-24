@@ -217,7 +217,3 @@ return [
     ],
 ];
 ```
-
-### Créditos
-
-Inspirado no [Artesaos/Defender](https://github.com/artesaos/defender).
