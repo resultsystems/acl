@@ -16,7 +16,7 @@ ou se preferir, adicione o seguinte trecho manualmente:
 ```
 {
     "require": {
-        "resultsystems/acl": "~0.21"
+        "resultsystems/acl": "~0.3"
     }
 }
 ```
