@@ -137,20 +137,6 @@ Route::get('/users', [
     //5=Filial/Empresa (opcional)
 ```
 
-## Buscar a filial/branch automaticamente
-Configura o middleware a ser usado em `config/acl.php`
-```
-    'middleware' => [
-        //Usar com Auth
-        'branch' => ResultSystems\Acl\Middlewares\AuthBranchMiddleware::class,
-        //Usar com Jwt
-        'branch' => ResultSystems\Acl\Middlewares\JwtBranchMiddleware::class,
-        /**
-         * Campo no auth/jwt que contém o id da filial
-         */
-        'branch_id' => 'branch_id',
-```
-
 ## Usando com a middleware com busca automática
 ```
 Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
@@ -188,6 +174,48 @@ if (Auth::user()->hasPermission(['user.create', 'user.update'], true, 1)) {
     echo 'tenho pelo menos uma das permissões na filial 1';
 }
 ```
+
+### config/acl.php
+```
+return [
+    //Informe a tabela de usuário aqui
+    'tables' => [
+        'user' => 'users',
+    ],
+
+    //Informe o model usuado que conecta a tabela de usuário
+    'model' => \App\User::class,
+
+    /**
+     * Informe a class que negará acesso
+     * caso usuário não tenha permissão
+     * você pode criar uma personalizada,
+     * porem precisa estender esta.
+     */
+    'forbidden_callback' => ResultSystems\Acl\Handlers\ForbiddenHandler::class,
+    /**
+     * Middleware para pegar a filial automaticamente
+     * para você não precisar informar na rota ou no controler
+     */
+    'middleware' => [
+        //Auto carrega o middleware em todas as rotas
+        'autoload' => false, //Auto load middleware in all reques
+
+        // Middleware utilizado para compatibilidade com o `Auth` do Laravel
+        'branch'   => ResultSystems\Acl\Middlewares\AuthBranchMiddleware::class,
+
+        // Middleware utilizado para compatibilidade com o `Jwt`
+        // mais informações https://github.com/tymondesigns/jwt-auth
+        //'branch'    => ResultSystems\Acl\Middlewares\JwtBranchMiddleware::class,
+
+        /**
+         * Campo no Auth::user()
+         * ou no JWT (Neste caso campo adicional)
+         * que representa a filial/branch atual
+         */
+        'branch_id' => 'branch_id',
+    ],
+];
 
 ### Créditos
 
