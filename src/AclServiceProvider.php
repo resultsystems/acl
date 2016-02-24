@@ -11,7 +11,7 @@ class AclServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->publishStorehouseConfiguration();
+        $this->publishConfiguration();
         $this->publishMigrations();
     }
     /**
@@ -32,7 +32,7 @@ class AclServiceProvider extends ServiceProvider
     /**
      * Publish dashboard configuration.
      */
-    protected function publishStorehouseConfiguration()
+    protected function publishConfiguration()
     {
         $this->publishes([
             __DIR__ . '/Resources/acl.php' => config_path('acl.php'),
