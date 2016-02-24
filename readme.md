@@ -56,6 +56,7 @@ php artisan migrate
 
 Caso você tenha a necessidade de realizar o controle de acesso diretamente nas rotas, o ACL possui um middleware (nativos) que abordam os casos mais comuns. Para utilizá-los é necessário registrá-los no seu arquivo app/Http/Kernel.php.
 
+### Laravel 5.1
 ```
 protected $routeMiddleware = [
     'auth'            => 'App\Http\Middleware\Authenticate',
@@ -64,6 +65,28 @@ protected $routeMiddleware = [
 
     // Controle de acesso usando permissões
     'needsPermission' => \ResultSystems\Acl\Middlewares\NeedsPermissionMiddleware::class,
+];
+```
+
+### Laravel 5.2
+```
+
+protected $routeMiddleware = [
+        'web' => [
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            // Controle de acesso usando permissões para WEB
+            'needsPermission' => \ResultSystems\Acl\Middlewares\NeedsPermissionMiddleware::class,
+        ],
+        'api' => [
+            'throttle:60,1',
+            // Controle de acesso usando permissões para API
+            'needsPermission' => \ResultSystems\Acl\Middlewares\NeedsPermissionMiddleware::class,
+        ],
+
 ];
 ```
 
