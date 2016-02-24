@@ -19,6 +19,8 @@ ou se preferir, adicione o seguinte trecho manualmente:
         "resultsystems/acl": "~0.3"
     }
 }
+composer update
+
 ```
 
 ## 2. Provider
