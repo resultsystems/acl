@@ -78,6 +78,21 @@ A utilização desses middlewares é explicada na próxima seção.
 Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
     'permission'               => ['user.read', 'user.create'],
     'any'                      => false, //usuário precisará ter as duas permissões
+    /**
+     * Caso a configuração em `config/acl.php`
+     * middleware->autoload for true,
+     * você poderá omitir a informação da branch_id
+     */
+     'branch_id'                => 'middleware',
+    function () {
+        dd('Tenho permissão');
+    }]);
+```
+
+```
+Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
+    'permission'               => ['user.read', 'user.create'],
+    'any'                      => false, //usuário precisará ter as duas permissões
     'branch_id'                => 1, // Empresa/filial (opcional)
     function () {
         dd('Tenho permissão');
