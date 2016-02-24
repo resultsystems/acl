@@ -13,6 +13,6 @@ class Branch extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'branch_role');
+        return $this->belongsToMany(config('acl.model'), 'branch_role', 'user_id');
     }
 }

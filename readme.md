@@ -36,7 +36,7 @@ Para usar o ACL em sua aplicação Laravel, é necessário registrar o package n
 
 ## 3. User Class
 
-Na sua classe de usuário, adicione a trait ResultSystems\Acl\Traits\PermissionTrait para disponibilizar os métodos para checagem de permissões:
+Na sua classe de usuário, adicione a trait `ResultSystems\Acl\Traits\PermissionTrait` para disponibilizar os métodos para checagem de permissões:
 
 ## 4. Publicando o arquivo de configuração e as migrations
 
@@ -63,11 +63,13 @@ protected $routeMiddleware = [
     'guest'           => 'App\Http\Middleware\RedirectIfAuthenticated',
 
     // Controle de acesso usando permissões
-    'needsPermission' => \ResultSystems\Acl\AclServiceProvider::class,
+    'needsPermission' => \ResultSystems\Acl\Middlewares\NeedsPermissionMiddleware::class,
 ];
 ```
 
 ## Usando o ACL
+
+Configure o arquivo `config/acl.php`
 
 A utilização desses middlewares é explicada na próxima seção.
 
@@ -97,6 +99,30 @@ Route::get('/users', [
     //5=Filial/Empresa (opcional)
 ```
 
+## Buscar a filial/branch automaticamente
+Configura o middleware a ser usado em `config/acl.php`
+```
+    'middleware' => [
+        //Usar com Auth
+        'branch' => ResultSystems\Acl\Middlewares\AuthBranchMiddleware::class,
+        //Usar com Jwt
+        'branch' => ResultSystems\Acl\Middlewares\JwtBranchMiddleware::class,
+        /**
+         * Campo no auth/jwt que contém o id da filial
+         */
+        'branch_id' => 'branch_id',
+```
+
+## Usando com a middleware com busca automática
+```
+Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
+    'permission'               => ['user.read', 'user.create'],
+    'any'                      => false, //usuário precisará ter as duas permissões
+    'branch_id'                => 'middleware',
+    function () {
+        dd('Tenho permissão');
+    }]);
+```
 #Usar em qualquer lugar com o Auth
 
 Você pode usar em qualquer lugar que o usuário esteja autenticado, usando o Auth.

@@ -24,13 +24,15 @@ class CreateBranchRoleTable extends Migration
                 ->references("id")
                 ->on("branches")
                 ->onDelete("cascade");
+
             $table->foreign("role_id")
                 ->references("id")
                 ->on("roles")
                 ->onDelete("cascade");
+
             $table->foreign("user_id")
                 ->references("id")
-                ->on("users")
+                ->on(config('acl.tables.user', 'users'))
                 ->onDelete("cascade");
         });
     }

@@ -21,9 +21,10 @@ class CreatePermissionUserTable extends Migration
                 ->references("id")
                 ->on("permissions")
                 ->onDelete('cascade');
+
             $table->foreign("user_id")
                 ->references("id")
-                ->on("users")
+                ->on(config('acl.tables.user', 'users'))
                 ->onDelete("cascade");
         });
     }

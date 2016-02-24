@@ -15,18 +15,20 @@ trait PermissionTrait
      */
     public function branches()
     {
-        return $this->belongsToMany(Branch::class, 'branch_role')
+        return $this->belongsToMany(Branch::class, 'branch_role', 'user_id')
             ->withPivot(['role_id'])
             ->with(['roles' => function ($query) {
                 $query
                     ->with(['permissions' => function ($q) {
                         $q
-                            ->where('allow', '=', true)
-                            ->where(function ($qq) {
-                                $qq
-                                    ->where('expires', '>=', date('Y-m-d H:i:s'))
-                                    ->where('expires', 'IS', 'NULL', 'OR');
-                            });
+                            ->where('allow', '=', true);
+                        /*
+            ->where(function ($qq) {
+            $qq
+            ->where('expires', '>=', date('Y-m-d H:i:s'))
+            ->where('expires', 'IS', 'NULL', 'OR');
+            });
+             */
                     }]);
             }]);
     }
@@ -38,7 +40,7 @@ trait PermissionTrait
      */
     public function roles()
     {
-        return $this->belongsToMany(Role::class, "role_user");
+        return $this->belongsToMany(Role::class, "role_user", 'user_id');
     }
 
     /**
@@ -48,7 +50,7 @@ trait PermissionTrait
      */
     public function permissions()
     {
-        return $this->belongsToMany(Permission::class, "permission_user");
+        return $this->belongsToMany(Permission::class, "permission_user", 'user_id');
     }
 
     /**
@@ -80,12 +82,14 @@ trait PermissionTrait
                 $query
                     ->with(['permissions' => function ($q) {
                         $q
-                            ->where('allow', '=', true)
-                            ->where(function ($qq) {
-                                $qq
-                                    ->where('expires', '>=', date('Y-m-d H:i:s'))
-                                    ->where('expires', 'IS', 'NULL', 'OR');
-                            });
+                            ->where('allow', '=', true);
+                        /*
+                ->where(function ($qq) {
+                $qq
+                ->where('expires', '>=', date('Y-m-d H:i:s'))
+                ->where('expires', 'IS', 'NULL', 'OR');
+                });
+                 */
                     }]);
             },
             "permissions" => function ($query) {
