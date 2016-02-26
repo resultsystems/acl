@@ -29,11 +29,11 @@ class PermissionTraitTest extends \TestCase
 
         $roles[] = $role;
 
-        $permission = m::mock(PermissionForTrait::class);
+        $mock = m::mock(PermissionForTrait::class);
 
         $checkPermissions = ['permission1', 'permission10'];
 
-        $check = $permission->checkPermissionsInRoles($roles, $checkPermissions, false);
+        $check = $mock->checkPermissionsInRoles($roles, $checkPermissions, false);
 
         $this->assertTrue($check);
     }
@@ -56,11 +56,11 @@ class PermissionTraitTest extends \TestCase
 
         $roles[] = $role;
 
-        $permission = m::mock(PermissionForTrait::class);
+        $mock = m::mock(PermissionForTrait::class);
 
         $checkPermissions = ['permission1', 'permission15'];
 
-        $check = $permission->checkPermissionsInRoles($roles, $checkPermissions, true);
+        $check = $mock->checkPermissionsInRoles($roles, $checkPermissions, true);
 
         $this->assertTrue($check);
     }
@@ -83,11 +83,11 @@ class PermissionTraitTest extends \TestCase
 
         $roles[] = $role;
 
-        $permission = m::mock(PermissionForTrait::class);
+        $mock = m::mock(PermissionForTrait::class);
 
         $checkPermissions = ['permission15'];
 
-        $check = $permission->checkPermissionsInRoles($roles, $checkPermissions, false);
+        $check = $mock->checkPermissionsInRoles($roles, $checkPermissions, false);
 
         $this->assertTrue(!$check);
     }
@@ -110,11 +110,91 @@ class PermissionTraitTest extends \TestCase
 
         $roles[] = $role;
 
-        $permission = m::mock(PermissionForTrait::class);
+        $mock = m::mock(PermissionForTrait::class);
 
         $checkPermissions = ['permission10'];
 
-        $check = $permission->checkPermissionsInRoles($roles, $checkPermissions, false);
+        $check = $mock->checkPermissionsInRoles($roles, $checkPermissions, false);
+
+        $this->assertTrue($check);
+    }
+
+    public function testHasPermissionInCheckPermissions()
+    {
+        $permissions = [];
+
+        for ($i = 0; $i <= 10; $i++) {
+            $permission       = new \stdClass();
+            $permission->slug = 'permission' . $i;
+
+            $permissions[] = $permission;
+        }
+
+        $mock = m::mock(PermissionForTrait::class);
+
+        $checkPermissions = ['permission1', 'permission10'];
+
+        $check = $mock->checkPermissions($permissions, $checkPermissions, false);
+
+        $this->assertTrue($check);
+    }
+
+    public function testHaveAnyPermissionInCheckPermissions()
+    {
+        $permissions = [];
+
+        for ($i = 0; $i <= 10; $i++) {
+            $permission       = new \stdClass();
+            $permission->slug = 'permission' . $i;
+
+            $permissions[] = $permission;
+        }
+
+        $mock = m::mock(PermissionForTrait::class);
+
+        $checkPermissions = ['permission1', 'permission15'];
+
+        $check = $mock->checkPermissions($permissions, $checkPermissions, true);
+
+        $this->assertTrue($check);
+    }
+
+    public function testHaventPermissionInCheckPermissions()
+    {
+        $permissions = [];
+
+        for ($i = 0; $i <= 10; $i++) {
+            $permission       = new \stdClass();
+            $permission->slug = 'permission' . $i;
+
+            $permissions[] = $permission;
+        }
+
+        $mock = m::mock(PermissionForTrait::class);
+
+        $checkPermissions = ['permission15'];
+
+        $check = $mock->checkPermissions($permissions, $checkPermissions, false);
+
+        $this->assertTrue(!$check);
+    }
+
+    public function testHasOnePermissionInCheckPermissions()
+    {
+        $permissions = [];
+
+        for ($i = 0; $i <= 10; $i++) {
+            $permission       = new \stdClass();
+            $permission->slug = 'permission' . $i;
+
+            $permissions[] = $permission;
+        }
+
+        $mock = m::mock(PermissionForTrait::class);
+
+        $checkPermissions = ['permission10'];
+
+        $check = $mock->checkPermissions($permissions, $checkPermissions, false);
 
         $this->assertTrue($check);
     }
