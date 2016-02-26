@@ -51,23 +51,23 @@ abstract class AbstractAclMiddleware
      *
      * @return mixed
      */
-    protected function getBranchId($request, $branch_id = null)
+    protected function getOwnerId($request, $owner_id = null)
     {
-        if ($branch_id == 'middleware') {
-            return $this->getBranchByMiddleware($request);
+        if ($owner_id == 'middleware') {
+            return $this->getOwnerByMiddleware($request);
         }
 
-        if (!is_null($branch_id)) {
-            return (int) $branch_id;
+        if (!is_null($owner_id)) {
+            return (int) $owner_id;
         }
 
         if (config('acl.middleware.autoload', false)) {
-            return $this->getBranchByMiddleware($request);
+            return $this->getOwnerByMiddleware($request);
         }
 
         $routeActions = $this->getActions($request);
 
-        return (int) array_get($routeActions, 'branch_id', 0);
+        return (int) array_get($routeActions, 'owner_id', 0);
     }
 
     /**
@@ -98,10 +98,10 @@ abstract class AbstractAclMiddleware
      * @param  \Illuminate\Http\Request  $request
      * @return int
      */
-    protected function getBranchByMiddleware($request)
+    protected function getOwnerByMiddleware($request)
     {
-        $handler = app()->make(config('acl.middleware.branch'));
+        $handler = app()->make(config('acl.middleware.owner'));
 
-        return ($handler instanceof BranchMiddleware) ? $handler->handle($request) : response('Forbidden', 403);
+        return ($handler instanceof OwnerMiddleware) ? $handler->handle($request) : response('Forbidden', 403);
     }
 }

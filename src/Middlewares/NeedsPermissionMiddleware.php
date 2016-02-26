@@ -14,11 +14,11 @@ class NeedsPermissionMiddleware extends AbstractAclMiddleware
      * @param callable                 $next
      * @param string|$array         $permissions
      * @param bool                       $any
-     * @param int|string                $branch_id
+     * @param int|string                $owner_id
      *
      * @return mixed
      */
-    public function handle($request, Closure $next, $permissions = null, $any = true, $branch_id = null)
+    public function handle($request, Closure $next, $permissions = null, $any = true, $owner_id = null)
     {
         if (is_null($this->user)) {
             return $this->forbiddenResponse();
@@ -26,18 +26,18 @@ class NeedsPermissionMiddleware extends AbstractAclMiddleware
 
         $checkPermissions = explode('|', $permissions); // Laravel 5.1 up - Using parameters
         $any              = $this->getBool($any);
-        $branch_id        = $this->getBranchId($request, $branch_id);
+        $owner_id         = $this->getOwnerId($request, $owner_id);
 
         if (is_null($permissions)) {
             $checkPermissions = $this->getPermissions($request);
             $any              = $this->getAny($request);
         }
 
-        if ($branch_id == 0) {
-            $branch_id = null;
+        if ($owner_id == 0) {
+            $owner_id = null;
         }
 
-        $hasPermission = $this->user->hasPermission($checkPermissions, $any, $branch_id);
+        $hasPermission = $this->user->hasPermission($checkPermissions, $any, $owner_id);
 
         if (!$hasPermission) {
             return $this->forbiddenResponse();

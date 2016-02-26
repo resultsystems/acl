@@ -1,6 +1,6 @@
 {
     "name": "resultsystems/acl",
-    "description": "Access Control List (ACL) Solution for Laravel 5.1",
+    "description": "Access Control List (ACL) Solution for Laravel 5.1/Laravel 5.2",
     "license": "MIT",
     "authors": [{
         "name": "Leandro Henrique Reis",

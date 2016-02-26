@@ -2,37 +2,11 @@
 
 namespace ResultSystems\Acl\Traits;
 
-use ResultSystems\Acl\Branch;
 use ResultSystems\Acl\Permission;
 use ResultSystems\Acl\Role;
 
 trait PermissionTrait
 {
-    /**
-     * Pegas as filiais
-     *
-     * @return Collection
-     */
-    public function branches()
-    {
-        return $this->belongsToMany(Branch::class, 'branch_role', 'user_id')
-            ->withPivot(['role_id'])
-            ->with(['roles' => function ($query) {
-                $query
-                    ->with(['permissions' => function ($q) {
-                        $q
-                            ->where('allow', '=', true);
-                        /*
-            ->where(function ($qq) {
-            $qq
-            ->where('expires', '>=', date('Y-m-d H:i:s'))
-            ->where('expires', 'IS', 'NULL', 'OR');
-            });
-             */
-                    }]);
-            }]);
-    }
-
     /**
      * Pega as Roles
      *
@@ -54,95 +28,64 @@ trait PermissionTrait
     }
 
     /**
-     * Verifica se o usuário tem a(s) permissão(ões) :permission
-     *
-     * Caso seja passado uma branch (filial)
-     * Será verificado as permissões apenas nesta branch
+     * Verifica se o usuário tem a permissão :permission
      *
      * @param  string  $permission
      * @param  bool    $any
-     * @param  int     $branch_id
+     * @param  int     $owner_id
      *
      * @return boolean
      */
-    public function hasPermission($checkPermissions, $any = true, $branch_id = null)
+    public function hasPermission($permission, $any = false, $owner_id = null)
+    {
+        if (!is_array($permission)) {
+            $permission = [$permission];
+        }
+
+        return $this->hasPermissions($permission, $any $owner_id);
+    }
+
+    /**
+     * Verifica se o usuário tem a(s) permissão(ões) :permissions
+     *
+     * @param  array  $permissions
+     * @param  bool    $any
+     * @param  int     $owner_id
+     *
+     * @return bool
+     */
+    public function hasPermissions(array $permissions, $any = false, $owner_id = null)
     {
         $user_id = $this->id;
-        $user    = $this->with(['branches' => function ($query) use ($branch_id, $user_id) {
+        $user    = $this->with(['roles' => function ($query) use ($owner_id) {
             $query
-                ->with(['roles' => function ($q) use ($user_id) {
-                    $q->where("user_id", "=", $user_id);
+                ->with(['permissions' => function ($q) {
+                    $q
+                        ->where('allow', '=', true)
+                        ->where(function ($qq) {
+                            $qq
+                                ->where('expires', '>=', date('Y-m-d H:i:s'))
+                                ->orWhereNull('expires');
+                        });
+
+                    if (is_null($owner_id)) {
+                        $q->where('owner_id', '=', $owner_id);
+                    } else {
+                        $q->whereNull('owner_id');
+                    }
                 }]);
-            if (!is_null($branch_id)) {
-                $query
-                    ->where("id", "=", $branch_id);
-            }
         },
-            'roles' => function ($query) {
-                $query
-                    ->with(['permissions' => function ($q) {
-                        $q
-                            ->where('allow', '=', true);
-                        /*
-                ->where(function ($qq) {
-                $qq
-                ->where('expires', '>=', date('Y-m-d H:i:s'))
-                ->where('expires', 'IS', 'NULL', 'OR');
-                });
-                 */
-                    }]);
-            },
             "permissions" => function ($query) {
                 $query->select("slug");
             }])
-            ->where("id", $this->id);
-        if ($branch_id) {
-            $user = $user->whereHas("branches", function ($query) use ($branch_id) {
-                $query->where('id', '=', $branch_id);
-            });
-        }
-        $user = $user->first();
+            ->where("id", $this->id)
+            ->first();
 
         if (is_null($user)) {
             return false;
         }
 
-        if ($branch_id) {
-            return $this->checkPermissionsByBranches($user->branches, $branch_id, $checkPermissions, $any);
-        }
-
-        if ($this->checkPermissions($user->permissions, $checkPermissions, $any)) {
-            return true;
-        }
-
-        if ($this->checkPermissionsInRoles($user->roles, $checkPermissions, $any)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Verifica se o usuário tem a(s) permissão(ões) :checkPermissions na branch :branch_id
-     *
-     * @param  array         $branches
-     * @param  int           $branch_id
-     * @param  array|string  $checkPermissions
-     * @param  bool          $any
-     *
-     * @return bool
-     */
-    private function checkPermissionsByBranches($branches, $branch_id, $checkPermissions, $any)
-    {
-        foreach ($branches as $branch) {
-            if ($branch->id != $branch_id) {
-                continue;
-            }
-
-            return $this->checkPermissionsInRoles($branch->roles, $checkPermissions, $any);
-        }
-
-        return false;
+        return $this->checkPermissions($user->permissions, $permissions, $any);
     }
 
     /**
@@ -150,31 +93,31 @@ trait PermissionTrait
      * Dentro de de alguma das roles :roles
      *
      * @param  array        $roles
-     * @param  array|string $checkPermissions
+     * @param  array $permissions
      * @param  bool          $any
      *
      * @return bool
      */
-    private function checkPermissionsInRoles($roles, $checkPermissions, $any)
+    private function checkPermissionsInRoles(array $roles, array $permissions, $any)
     {
         foreach ($roles as $role) {
-            return $this->checkPermissions($role->permissions, $checkPermissions, $any);
+            return $this->checkPermissions($role->permissions, $permissions, $any);
         }
 
         return false;
     }
 
     /**
-     * Checka se a(s) permissão(ões) :checkPermissions
+     * Checa se a(s) permissão(ões) :permissions
      * Está em :permissions
      *
      * @param  array        $permissions
-     * @param  array|string $checkPermissions
+     * @param  array $checkPermissions
      * @param  bool         $any
      *
      * @return bool
      */
-    private function checkPermissions($permissions, $checkPermissions, $any)
+    private function checkPermissions(array $permissions, array $checkPermissions, $any = false)
     {
         if (!is_array($checkPermissions)) {
             $checkPermissions = array($checkPermissions);
@@ -191,9 +134,11 @@ trait PermissionTrait
             if ($has and $any) {
                 return true;
             }
+
             if (!$has and !$any) {
                 return false;
             }
+
             if ($has) {
                 $total++;
             }

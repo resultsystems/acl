@@ -106,9 +106,9 @@ Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
     /**
      * Caso a configuração em `config/acl.php`
      * middleware->autoload for true,
-     * você poderá omitir a informação da branch_id
+     * você poderá omitir a informação da owner_id
      */
-     'branch_id'                => 'middleware',
+     'owner_id'                => 'middleware', /*
     function () {
         dd('Tenho permissão');
     }]);
@@ -118,7 +118,7 @@ Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
 Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
     'permission'               => ['user.read', 'user.create'],
     'any'                      => false, //usuário precisará ter as duas permissões
-    'branch_id'                => 1, // Empresa/filial (opcional)
+    'owner_id'                => 1, // Empresa/filial *
     function () {
         dd('Tenho permissão');
     }]);
@@ -136,19 +136,25 @@ Route::get('/users', [
     //user.read=permissão user.read
     //user.create=permissão user.create
     //any=true Usuário pode ter qualquer das permissões informadas
-    //5=Filial/Empresa (opcional)
+    //5=Filial/Empresa
 ```
+
 
 ## Usando com a middleware com busca automática
 ```
 Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
     'permission'               => ['user.read', 'user.create'],
     'any'                      => false, //usuário precisará ter as duas permissões
-    'branch_id'                => 'middleware',
+    'owner_id'                => 'middleware', //*
     function () {
         dd('Tenho permissão');
     }]);
 ```
+* Se não for passado um :id ou 'middleware' e
+nem estiver configurado para pegar o owner_id
+via middlware será buscado apenas permissões com
+owner_id nulo
+
 #Usar em qualquer lugar com o Auth
 
 Você pode usar em qualquer lugar que o usuário esteja autenticado, usando o Auth.
@@ -160,19 +166,19 @@ if (Auth::user()->hasPermission('user.create')) {
     echo 'tenho permissão';
 }
 
-if (Auth::user()->hasPermission(['user.create', 'user.update'])) {
+if (Auth::user()->hasPermissions(['user.create', 'user.update'])) {
     echo 'tenho pelo menos uma das permissões';
 }
 
-if (Auth::user()->hasPermission(['user.create', 'user.update'], false)) {
+if (Auth::user()->hasPermissions(['user.create', 'user.update'], false)) {
     echo 'tenho ambas as permissões';
 }
 
-if (Auth::user()->hasPermission(['user.create', 'user.update'], false, 1)) {
+if (Auth::user()->hasPermissions(['user.create', 'user.update'], false, 1)) {
     echo 'tenho ambas as permissões na filial 1';
 }
 
-if (Auth::user()->hasPermission(['user.create', 'user.update'], true, 1)) {
+if (Auth::user()->hasPermissions(['user.create', 'user.update'], true, 1)) {
     echo 'tenho pelo menos uma das permissões na filial 1';
 }
 ```
@@ -204,18 +210,18 @@ return [
         'autoload' => false, //Auto load middleware in all reques
 
         // Middleware utilizado para compatibilidade com o `Auth` do Laravel
-        'branch'   => ResultSystems\Acl\Middlewares\AuthBranchMiddleware::class,
+        'owner'   => ResultSystems\Acl\Middlewares\AuthOwnerMiddleware::class,
 
         // Middleware utilizado para compatibilidade com o `Jwt`
         // mais informações https://github.com/tymondesigns/jwt-auth
-        //'branch'    => ResultSystems\Acl\Middlewares\JwtBranchMiddleware::class,
+        //'owner'    => ResultSystems\Acl\Middlewares\JwtOwnerMiddleware::class,
 
         /**
          * Campo no Auth::user()
          * ou no JWT (Neste caso campo adicional)
-         * que representa a filial/branch atual
+         * que representa a filial/owner atual
          */
-        'branch_id' => 'branch_id',
+        'owner_id' => 'owner_id',
     ],
 ];
 ```

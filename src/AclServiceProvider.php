@@ -14,6 +14,7 @@ class AclServiceProvider extends ServiceProvider
         $this->publishConfiguration();
         $this->publishMigrations();
     }
+
     /**
      * Service provider registration
      */
@@ -21,6 +22,7 @@ class AclServiceProvider extends ServiceProvider
     {
         $this->registerBindings();
     }
+
     /**
      * Register IoC Bindings
      */

@@ -2,16 +2,20 @@
 
 namespace ResultSystems\Acl\Middlewares;
 
-class BranchMiddleware
+use Auth;
+
+class AuthOwnerMiddleware extends OwnerMiddleware
 {
     /**
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return mixed
+     * @return int
      */
     public function handle($request)
     {
-        return null;
+        $owner_id = env('acl.middleware.owner_id', 'owner_id');
+
+        return Auth::user()->$owner_id;
     }
 }

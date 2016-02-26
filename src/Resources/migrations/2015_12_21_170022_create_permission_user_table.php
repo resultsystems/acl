@@ -16,6 +16,7 @@ class CreatePermissionUserTable extends Migration
             $table->integer('permission_id')->unsigned();
             $table->integer('user_id')->unsigned();
             $table->timestamp('expires')->nullable();
+            $table->integer('owner_id')->nulltable()->default(null);
 
             $table->foreign("permission_id")
                 ->references("id")

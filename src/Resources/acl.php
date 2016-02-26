@@ -17,24 +17,27 @@ return [
      * Forbidden callback
      */
     'forbidden_callback' => ResultSystems\Acl\Handlers\ForbiddenHandler::class,
+
     /**
-     * Get branch by user authentication with auth
+     * Get owner by user authentication with auth
      */
     'middleware' => [
         'autoload' => false, //Auto load middleware in all reques
-        'branch'   => ResultSystems\Acl\Middlewares\AuthBranchMiddleware::class,
-        /**
-         * Get branch by user authentication with Jwt
-         */
-        //'branch'    => ResultSystems\Acl\Middlewares\JwtBranchMiddleware::class,
+        'owner'    => ResultSystems\Acl\Middlewares\AuthOwnerMiddleware::class,
 
         /**
-         * Field for compare branch_id
+         * Get owner by user authentication with Jwt
          */
-        'branch_id' => 'branch_id',
+        //'owner'    => ResultSystems\Acl\Middlewares\JwtOwnerMiddleware::class,
+
+        /**
+         * Field for compare owner_id
+         */
+        'owner_id' => 'owner_id',
+
         /**
          * Another exemple
          */
-        //'branch_id' => 'owner_id',
+        //'owner_id' => 'branch_id',
     ],
 ];

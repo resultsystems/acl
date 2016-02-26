@@ -17,6 +17,7 @@ class CreateRoleUserTable extends Migration
             $table->integer("user_id")->unsigned();
             $table->boolean('allow')->default(true);
             $table->timestamp('expires')->nullable();
+            $table->integer('owner_id')->nulltable()->default(null);
 
             $table->foreign("role_id")
                 ->references("id")
