@@ -91,4 +91,31 @@ class PermissionTraitTest extends \TestCase
 
         $this->assertTrue(!$check);
     }
+
+    public function testHasOnePermissionInCheckPermissionsInRoles()
+    {
+        $permissions = [];
+
+        for ($i = 0; $i <= 10; $i++) {
+            $permission       = new \stdClass();
+            $permission->slug = 'permission' . $i;
+
+            $permissions[] = $permission;
+        }
+
+        $roles             = [];
+        $role              = new \stdClass();
+        $role->permissions = $permissions;
+        $role->name        = 'admin';
+
+        $roles[] = $role;
+
+        $permission = m::mock(PermissionForTrait::class);
+
+        $checkPermissions = ['permission10'];
+
+        $check = $permission->checkPermissionsInRoles($roles, $checkPermissions, false);
+
+        $this->assertTrue($check);
+    }
 }
