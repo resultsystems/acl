@@ -34,7 +34,7 @@ trait PermissionTrait
      * @param  bool    $any
      * @param  int     $owner_id
      *
-     * @return boolean
+     * @return bool
      */
     public function hasPermission($permission, $any = false, $owner_id = null)
     {
@@ -42,7 +42,7 @@ trait PermissionTrait
             $permission = [$permission];
         }
 
-        return $this->hasPermissions($permission, $any $owner_id);
+        return $this->hasPermissions($permission, $any, $owner_id);
     }
 
     /**
@@ -98,7 +98,7 @@ trait PermissionTrait
      *
      * @return bool
      */
-    private function checkPermissionsInRoles(array $roles, array $permissions, $any)
+    protected function checkPermissionsInRoles(array $roles, array $permissions, $any)
     {
         foreach ($roles as $role) {
             return $this->checkPermissions($role->permissions, $permissions, $any);
@@ -117,12 +117,8 @@ trait PermissionTrait
      *
      * @return bool
      */
-    private function checkPermissions(array $permissions, array $checkPermissions, $any = false)
+    protected function checkPermissions(array $permissions, array $checkPermissions, $any = false)
     {
-        if (!is_array($checkPermissions)) {
-            $checkPermissions = array($checkPermissions);
-        }
-
         $filtered = [];
         foreach ($permissions as $item) {
             $filtered[] = $item->slug;
