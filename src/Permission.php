@@ -13,6 +13,6 @@ class Permission extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(config('acl.model'), 'permission_user', 'user_id');
     }
 }

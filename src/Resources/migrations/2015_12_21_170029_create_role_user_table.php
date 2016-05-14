@@ -17,14 +17,16 @@ class CreateRoleUserTable extends Migration
             $table->integer("user_id")->unsigned();
             $table->boolean('allow')->default(true);
             $table->timestamp('expires')->nullable();
+            $table->integer('owner_id')->nulltable()->default(null);
 
             $table->foreign("role_id")
                 ->references("id")
                 ->on("roles")
                 ->onDelete("cascade");
+
             $table->foreign("user_id")
                 ->references("id")
-                ->on("users")
+                ->on(config('acl.tables.user', 'users'))
                 ->onDelete("cascade");
         });
     }

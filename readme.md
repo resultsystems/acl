@@ -4,7 +4,7 @@ ACL é um package ACL para Laravel 5 que utiliza filial, grupos e permissões.
 Este projeto tem como objetivo prover o controle de acesso da sua aplicação.
 Foi desenvolvido pensando em multi-empresa/filiais.
 
-## Instação
+## Instalação
 
 ACL pode ser instalado através do composer. Para que o package seja adicionado automaticamente ao seu arquivo composer.json execute o seguinte comando:
 
@@ -16,9 +16,11 @@ ou se preferir, adicione o seguinte trecho manualmente:
 ```
 {
     "require": {
-        "resultsystems/acl": "~0.21"
+        "resultsystems/acl": "~0.3"
     }
 }
+composer update
+
 ```
 
 ## 2. Provider
@@ -36,7 +38,7 @@ Para usar o ACL em sua aplicação Laravel, é necessário registrar o package n
 
 ## 3. User Class
 
-Na sua classe de usuário, adicione a trait ResultSystems\Acl\Traits\PermissionTrait para disponibilizar os métodos para checagem de permissões:
+Na sua classe de usuário, adicione a trait `ResultSystems\Acl\Traits\PermissionTrait` para disponibilizar os métodos para checagem de permissões:
 
 ## 4. Publicando o arquivo de configuração e as migrations
 
@@ -52,11 +54,11 @@ Execute as migrations, para que sejam criadas as tabelas no banco de dados:
 
 php artisan migrate
 
-
 ## 5. Middleware do ACL
 
 Caso você tenha a necessidade de realizar o controle de acesso diretamente nas rotas, o ACL possui um middleware (nativos) que abordam os casos mais comuns. Para utilizá-los é necessário registrá-los no seu arquivo app/Http/Kernel.php.
 
+### Laravel 5.1
 ```
 protected $routeMiddleware = [
     'auth'            => 'App\Http\Middleware\Authenticate',
@@ -64,12 +66,35 @@ protected $routeMiddleware = [
     'guest'           => 'App\Http\Middleware\RedirectIfAuthenticated',
 
     // Controle de acesso usando permissões
-    'needsPermission' => \ResultSystems\Acl\AclServiceProvider::class,
+    'needsPermission' => \ResultSystems\Acl\Middlewares\NeedsPermissionMiddleware::class,
 ];
 ```
 
+### Laravel 5.2
+```
+
+protected $routeMiddleware = [
+        'web' => [
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            // Controle de acesso usando permissões para WEB
+            'needsPermission' => \ResultSystems\Acl\Middlewares\NeedsPermissionMiddleware::class,
+        ],
+        'api' => [
+            'throttle:60,1',
+            // Controle de acesso usando permissões para API
+            'needsPermission' => \ResultSystems\Acl\Middlewares\NeedsPermissionMiddleware::class,
+        ],
+
+];
+```
 
 ## Usando o ACL
+
+Configure o arquivo `config/acl.php`
 
 A utilização desses middlewares é explicada na próxima seção.
 
@@ -78,7 +103,22 @@ A utilização desses middlewares é explicada na próxima seção.
 Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
     'permission'               => ['user.read', 'user.create'],
     'any'                      => false, //usuário precisará ter as duas permissões
-    'branch_id'                => 1, // Empresa/filial (opcional)
+    /**
+     * Caso a configuração em `config/acl.php`
+     * middleware->autoload for true,
+     * você poderá omitir a informação da owner_id
+     */
+     'owner_id'                => 'middleware', /*
+    function () {
+        dd('Tenho permissão');
+    }]);
+```
+
+```
+Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
+    'permission'               => ['user.read', 'user.create'],
+    'any'                      => false, //usuário precisará ter as duas permissões
+    'owner_id'                => 1, // Empresa/filial *
     function () {
         dd('Tenho permissão');
     }]);
@@ -96,8 +136,24 @@ Route::get('/users', [
     //user.read=permissão user.read
     //user.create=permissão user.create
     //any=true Usuário pode ter qualquer das permissões informadas
-    //5=Filial/Empresa (opcional)
+    //5=Filial/Empresa
 ```
+
+
+## Usando com a middleware com busca automática
+```
+Route::post('/users', ['middleware' => ['auth', 'needsPermission'],
+    'permission'               => ['user.read', 'user.create'],
+    'any'                      => false, //usuário precisará ter as duas permissões
+    'owner_id'                => 'middleware', //*
+    function () {
+        dd('Tenho permissão');
+    }]);
+```
+* Se não for passado um :id ou 'middleware' e
+nem estiver configurado para pegar o owner_id
+via middlware será buscado apenas permissões com
+owner_id nulo
 
 #Usar em qualquer lugar com o Auth
 
@@ -110,23 +166,62 @@ if (Auth::user()->hasPermission('user.create')) {
     echo 'tenho permissão';
 }
 
-if (Auth::user()->hasPermission(['user.create', 'user.update'])) {
+if (Auth::user()->hasPermissions(['user.create', 'user.update'])) {
     echo 'tenho pelo menos uma das permissões';
 }
 
-if (Auth::user()->hasPermission(['user.create', 'user.update'], false)) {
+if (Auth::user()->hasPermissions(['user.create', 'user.update'], false)) {
     echo 'tenho ambas as permissões';
 }
 
-if (Auth::user()->hasPermission(['user.create', 'user.update'], false, 1)) {
+if (Auth::user()->hasPermissions(['user.create', 'user.update'], false, 1)) {
     echo 'tenho ambas as permissões na filial 1';
 }
 
-if (Auth::user()->hasPermission(['user.create', 'user.update'], true, 1)) {
+if (Auth::user()->hasPermissions(['user.create', 'user.update'], true, 1)) {
     echo 'tenho pelo menos uma das permissões na filial 1';
 }
 ```
 
-### Créditos
+### config/acl.php
+```
+return [
+    //Informe a tabela de usuário aqui
+    'tables' => [
+        'user' => 'users',
+    ],
 
-Inspirado no [Artesaos/Defender](https://github.com/artesaos/defender).
+    //Informe o model usuado que conecta a tabela de usuário
+    'model' => \App\User::class,
+
+    /**
+     * Informe a class que negará acesso
+     * caso usuário não tenha permissão
+     * você pode criar uma personalizada,
+     * porem precisa estender esta.
+     */
+    'forbidden_callback' => ResultSystems\Acl\Handlers\ForbiddenHandler::class,
+    /**
+     * Middleware para pegar a filial automaticamente
+     * para você não precisar informar na rota ou no controler
+     */
+    'middleware' => [
+        //Auto carrega o middleware em todas as rotas
+        'autoload' => false, //Auto load middleware in all reques
+
+        // Middleware utilizado para compatibilidade com o `Auth` do Laravel
+        'owner'   => ResultSystems\Acl\Middlewares\AuthOwnerMiddleware::class,
+
+        // Middleware utilizado para compatibilidade com o `Jwt`
+        // mais informações https://github.com/tymondesigns/jwt-auth
+        //'owner'    => ResultSystems\Acl\Middlewares\JwtOwnerMiddleware::class,
+
+        /**
+         * Campo no Auth::user()
+         * ou no JWT (Neste caso campo adicional)
+         * que representa a filial/owner atual
+         */
+        'owner_id' => 'owner_id',
+    ],
+];
+```

@@ -51,11 +51,23 @@ abstract class AbstractAclMiddleware
      *
      * @return mixed
      */
-    protected function getBranchId($request)
+    protected function getOwnerId($request, $owner_id = null)
     {
+        if ($owner_id == 'middleware') {
+            return $this->getOwnerByMiddleware($request);
+        }
+
+        if (!is_null($owner_id)) {
+            return (int) $owner_id;
+        }
+
+        if (config('acl.middleware.autoload', false)) {
+            return $this->getOwnerByMiddleware($request);
+        }
+
         $routeActions = $this->getActions($request);
 
-        return (int) array_get($routeActions, 'branch_id', 0);
+        return (int) array_get($routeActions, 'owner_id', 0);
     }
 
     /**
@@ -80,5 +92,16 @@ abstract class AbstractAclMiddleware
         $handler = app()->make(config('acl.forbidden_callback'));
 
         return ($handler instanceof ForbiddenHandler) ? $handler->handle() : response('Forbidden', 403);
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return int
+     */
+    protected function getOwnerByMiddleware($request)
+    {
+        $handler = app()->make(config('acl.middleware.owner'));
+
+        return ($handler instanceof OwnerMiddleware) ? $handler->handle($request) : response('Forbidden', 403);
     }
 }
