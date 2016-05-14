@@ -45,8 +45,6 @@ Na sua classe de usuário, adicione a trait `ResultSystems\Acl\Traits\Permission
 Para publicar o arquivo de configuração padrão e as migrations que acompanham o package, execute o seguinte comando:
 
 ```
-php artisan vendor:publish
-ou
 php artisan vendor:publish --provider="ResultSystems\Acl\AclServiceProvider"
 ```
 
