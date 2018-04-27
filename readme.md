@@ -1,3 +1,5 @@
+# Há formas melhores e mais simples de fazer o mesmo, pacote abandonado!
+
 # ResultSystems ACL
 
 ACL é um package ACL para Laravel 5 que utiliza filial, grupos e permissões.
